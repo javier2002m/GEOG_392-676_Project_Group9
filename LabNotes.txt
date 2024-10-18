@@ -1,0 +1,19 @@
+which pip  # finds directory location of pip app
+which python  # finds directory location of python app
+python --version  # returns the version of python currently in use
+ls  # lists folders and files within current directory
+ls -al  # lists all files and file types within current directory
+conda create -n geog392 python=3.10  # creates a new python interpreter
+rm  # removes file from working tree
+rm -rf
+
+git init  # will initialize a local repository in directory
+git add [file]  # adds file within folder to working tree
+git commit -m "file"  # commits the changes made to a file in the local repo to the working tree
+git status  # returns the objects in the working tree, describing what is/isn't travked, what has/hasn't been committed, and what has/hasn't been pushed
+git branch -M main  # renames the master branch (command line) to the remote (main) branch repo
+git remote add origin [url]  # connects directory to github
+git push -u origin main  # pushes changes made in working tree to remote repo
+
+git config --get remote.origin.url  # obtains remote url
+git remote show origin  # returns full output of the remote repo of the origin
