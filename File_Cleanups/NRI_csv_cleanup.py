@@ -4,7 +4,7 @@ import geopandas as gpd
 # import matplotlib
 
 def Dataframe_to_list(object):
-   """Converts  a dataframe or geodatabase table to an iterable list. 
+   """Converts a dataframe or geodatabase table to an iterable list. 
    Input is the dataframe/table, and output is assigning a the list to a variable"""
    new_list = []
    for item in object:
@@ -28,7 +28,7 @@ def dictionary_append(dictionary_list, ID):
    dictionary_list.append(new_list) # Appends row to dictionary
 
 def FieldValues_ToNewDictionary(alias, values):
-   """ Function will take a given name/title for the list of values and will 
+   """ Function will take a given name/title (alias) for the list of values and will 
    then create a dictionary between a the title and the list of values as output"""
    new_list = []
    for x in values:

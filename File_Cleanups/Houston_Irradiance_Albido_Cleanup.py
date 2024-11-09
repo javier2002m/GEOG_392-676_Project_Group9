@@ -11,14 +11,20 @@ HoustonIrrAlbFolder = data_folder_path+r'/HoustonIrradianceAlbido_Tables'
 Houston_Area = HoustonIrrAlbFolder+r"/POWER_Regional_Monthly_2012_2022.csv"
 
 def row_to_list(alias, row_list):
-   """ Will take count(row ID), field name alias, the list containing values, and an empty list where values will be appended. 
-   Output will be a dictionary with the count as the index and row_values as the value """
+   """ Will take field name alias and the list containing values. 
+   Output will be a list of the row and its values """
    values_list = [] # this blank list will have the comma-separated values appended, this list will be the value of each row dictionary
    for item in range(len(row_list)):
       if item == 0: # locates the field name index, then replaces field name with alias as first list value
          values_list.append(alias)
       else: # all other values
-         values_list.append(row_list[item])
+         try:
+            if item >= 4: # this index is where the data values for each month is found
+               values_list.append(float(row_list[item])) # convert value to a numerical value
+            else:
+               values_list.append(row_list[item]) # indices before the monthly values
+         except ValueError: # accounts for index identifier columns
+            values_list.append(row_list[item])
    else:
       return values_list
 
@@ -34,26 +40,6 @@ def column_to_dict(ID, dict_list):
    else:
       new_dict = {column_name:new_list} # new dictionary
       return new_dict
-
-# def column_list(dict_list):
-#    for dictionary in range(len(dict_list)):
-#       FIELD_list.append(dict_list[dictionary][0])
-#       YEAR_list.append(dict_list[dictionary][1])
-#       LAT_list.append(dict_list[dictionary][2])
-#       LON_list.append(dict_list[dictionary][3])
-#       JAN_list.append(dict_list[dictionary][4])
-#       FEB_list.append(dict_list[dictionary][5])
-#       MAR_list.append(dict_list[dictionary][6])
-#       APR_list.append(dict_list[dictionary][7])
-#       MAY_list.append(dict_list[dictionary][8])
-#       JUN_list.append(dict_list[dictionary][9])
-#       JUL_list.append(dict_list[dictionary][10])
-#       AUG_list.append(dict_list[dictionary][11])
-#       SEP_list.append(dict_list[dictionary][12])
-#       OCT_list.append(dict_list[dictionary][13])
-#       NOV_list.append(dict_list[dictionary][14])
-#       DEC_list.append(dict_list[dictionary][15])
-#       ANN_list.append(dict_list[dictionary][16])
 
 """ load data into GeoDataFrame """
 # Downtown_readcsv = gpd.read_file(Downtown) # Latitude:29.7588 :: Longitude:-95.3709
@@ -72,9 +58,6 @@ HoustonArea_readcsv = gpd.read_file(Houston_Area) # Spatial Coordinate extent - 
 # print(HoustonArea_readcsv['-BEGIN'])
 # HoustonArea_readcsv.plot()
 
-""" Convert GeoDataFrame to list of dictionaries and print """
-Houston_dict_list = {} # will contain the four field dictionaries
-
 """ The following variables are Field Aliases for their respective field name """
 ALLSKY_SRF_ALB = 'All Sky Surface Albedo (dimensionless)'
 ALLSKY_SFC_LW_DWN = 'All Sky Surface Longwave Downward Irradiance (W/m^2)'
@@ -82,16 +65,8 @@ ALLSKY_SFC_SW_DWN = 'All Sky Surface Shortwave Downward Irradiance (kW-hr/m^2/da
 ALLSKY_SFC_PAR_TOT = 'All Sky Surface PAR Total (W/m^2)'
 """ The following variables are the four different field dictionary lists """
 row_values_list = []
-# SRF_ALB_dict = []
-# SFC_LW_DWN_dict = []
-# SFC_SW_DWN_dict = []
-# SFC_PAR_TOT_dict = []
 """ The following variables count the loop iterations over the data for a specific field. 
 Will be used as an ID to identify each dictionary's rows """
-# srf_alb_count = 0
-# sfc_lw_count = 0
-# sfc_sw_count = 0
-# sfc_par_count = 0
 """ The first column of the dataset(s) contains rows with the relevant data as a comma-separated list of months/titles/values """
 data_column = HoustonArea_readcsv['-BEGIN'] # '-BEGIN' is the column where the datavalues can be found
 """ This loop will iterate thru the index values of the Houston Area csv dataset 
@@ -113,7 +88,8 @@ for row_ind in range(len(data_column)): # finds index in range of data column ro
          row_values_list.append(dictionary_title)
          continue
       if (lat >= 29.5) and (lat <= 30.1) and (lon >= -95.8) and (lon <= -95): # desired spatial extent query
-         """ Identifies the field name, and then creates the indexed dictionary with the correct information """
+         """ Identifies the field name, and then creates a list of values, replacing 
+         the field name with the field alias, then appends new list to the dictionary """
          if new_list[0] == 'ALLSKY_SRF_ALB':
             row_dict = row_to_list(ALLSKY_SRF_ALB, new_list)
             row_values_list.append(row_dict)
@@ -127,32 +103,43 @@ for row_ind in range(len(data_column)): # finds index in range of data column ro
             row_dict = row_to_list(ALLSKY_SFC_PAR_TOT, new_list)
             row_values_list.append(row_dict)
 else:
-   # print(SRF_ALB_dict)
-   # print(SFC_LW_DWN_dict)
-   # print(SFC_SW_DWN_dict)
-   # print(SFC_PAR_TOT_dict)
-   # print(Houston_dict_list)
-   # SRF_ALB_df = pd.DataFrame(SRF_ALB_dict)
-   # print(SRF_ALB_df)
-   pass
-
-FIELD_list = column_to_dict(0, row_values_list)
-YEAR_list = column_to_dict(1, row_values_list)
-LAT_list = column_to_dict(2, row_values_list)
-LON_list = column_to_dict(3, row_values_list)
-JAN_list = column_to_dict(4, row_values_list)
-FEB_list = column_to_dict(5, row_values_list)
-MAR_list = column_to_dict(6, row_values_list)
-APR_list = column_to_dict(7, row_values_list)
-MAY_list = column_to_dict(8, row_values_list)
-JUN_list = column_to_dict(9, row_values_list)
-JUL_list = column_to_dict(10, row_values_list)
-AUG_list = column_to_dict(11, row_values_list)
-SEP_list = column_to_dict(12, row_values_list)
-OCT_list = column_to_dict(13, row_values_list)
-NOV_list = column_to_dict(14, row_values_list)
-DEC_list = column_to_dict(15, row_values_list)
-ANN_list = column_to_dict(16, row_values_list)
-
-# print(YEAR_list)
-# print(ANN_list)
+   Houston_dict_list = {} # will contain the dictionary of every field in the dataset
+   """ Create the dictionary for each column, then append the dictionary to the large dictionary """
+   FIELD_list = column_to_dict(0, row_values_list)
+   Houston_dict_list.update(FIELD_list)
+   YEAR_list = column_to_dict(1, row_values_list)
+   Houston_dict_list.update(YEAR_list)
+   LAT_list = column_to_dict(2, row_values_list)
+   Houston_dict_list.update(LAT_list)
+   LON_list = column_to_dict(3, row_values_list)
+   Houston_dict_list.update(LON_list)
+   JAN_list = column_to_dict(4, row_values_list)
+   Houston_dict_list.update(JAN_list)
+   FEB_list = column_to_dict(5, row_values_list)
+   Houston_dict_list.update(FEB_list)
+   MAR_list = column_to_dict(6, row_values_list)
+   Houston_dict_list.update(MAR_list)
+   APR_list = column_to_dict(7, row_values_list)
+   Houston_dict_list.update(APR_list)
+   MAY_list = column_to_dict(8, row_values_list)
+   Houston_dict_list.update(MAY_list)
+   JUN_list = column_to_dict(9, row_values_list)
+   Houston_dict_list.update(JUN_list)
+   JUL_list = column_to_dict(10, row_values_list)
+   Houston_dict_list.update(JUL_list)
+   AUG_list = column_to_dict(11, row_values_list)
+   Houston_dict_list.update(AUG_list)
+   SEP_list = column_to_dict(12, row_values_list)
+   Houston_dict_list.update(SEP_list)
+   OCT_list = column_to_dict(13, row_values_list)
+   Houston_dict_list.update(OCT_list)
+   NOV_list = column_to_dict(14, row_values_list)
+   Houston_dict_list.update(NOV_list)
+   DEC_list = column_to_dict(15, row_values_list)
+   Houston_dict_list.update(DEC_list)
+   ANN_list = column_to_dict(16, row_values_list)
+   Houston_dict_list.update(ANN_list)
+   """ Create a dataframe of the Listed Dictionary, then convert the dataframe to a new csv file """
+   Houston_df = pd.DataFrame(Houston_dict_list)
+   # Houston_df.to_csv(data_output_folder+'/Houston_Irradiance_Albido.csv')
+   print(Houston_df)
