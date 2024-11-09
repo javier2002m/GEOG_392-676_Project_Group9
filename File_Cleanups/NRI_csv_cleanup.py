@@ -137,61 +137,8 @@ for csv_field in NRI_CSVfields: # Loops thru list of NRI CSV fields
       if csv_field == relevant_name:
          """ 'csv_field == relevant_name' Should only occur when mathing CSV field name with 
          Dictionary Field Name, to then add field alias as the dictionary title/index to its values """
-         if relevant_layer == 'Coastal Flooding':
-            if relevant_metric == 'Number of Events':
-               coast_event = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(coast_event)
-            elif relevant_metric == 'Annualized Frequency':
-               coast_freq = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(coast_freq)
-            elif relevant_metric == 'National Percentile':
-               coast_percent = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(coast_percent)
-         elif relevant_layer == 'Drought':
-            if relevant_metric == 'Number of Events':
-               drought_event = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(drought_event)
-            elif relevant_metric == 'Annualized Frequency':
-               drought_freq = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(drought_freq)
-            elif relevant_metric == 'National Percentile':
-               drought_percent = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(drought_percent)
-         elif relevant_layer == 'Heat Wave':
-            if relevant_metric == 'Number of Events':
-               heatwave_event = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(heatwave_event)
-            elif relevant_metric == 'Annualized Frequency':
-               heatwave_freq = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(heatwave_freq)
-            elif relevant_metric == 'National Percentile':
-               heatwave_percent = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(heatwave_percent)
-         elif relevant_layer == 'Hurricane':
-            if relevant_metric == 'Number of Events':
-               hurricane_event = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(hurricane_event)
-            elif relevant_metric == 'Annualized Frequency':
-               hurricane_freq = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(hurricane_freq)
-            elif relevant_metric == 'National Percentile':
-               hurricane_percent = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(hurricane_percent)
-         elif relevant_layer == 'Riverine Flooding':
-            if relevant_metric == 'Number of Events':
-               riverine_event = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(riverine_event)
-            elif relevant_metric == 'Annualized Frequency':
-               riverine_freq = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(riverine_freq)
-            elif relevant_metric == 'National Percentile':
-               riverine_percent = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-               csv_new_dict_list.update(riverine_percent)
-         else: # Append matches to list of dictionaries
-            """ Hazard Layers are not the only fields we want in our new table, we should also 
-            include Object ID, aka OID_, and the remaining matches to the fields in our dictionary """
-            extra_list = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
-            csv_new_dict_list.update(extra_list)
+         layer_dictionary = FieldValues_ToNewDictionary(relevant_alias,RelevantField_ValuesList)
+         csv_new_dict_list.update(layer_dictionary)
       else: # Appends 'OID_' but excludes all other fields
          if csv_field == 'OID_':
             id_list = FieldValues_ToNewDictionary('NRI_ObjectID',RelevantField_ValuesList)
@@ -200,4 +147,4 @@ for csv_field in NRI_CSVfields: # Loops thru list of NRI CSV fields
 # print(csv_new_dict_list)
 
 df = pd.DataFrame(csv_new_dict_list)
-df.to_csv(data_output_folder+'/NRI_CensusTracts_HarrisCO.csv')
+# df.to_csv(data_output_folder+'/NRI_CensusTracts_HarrisCO.csv')
