@@ -10,6 +10,44 @@ data_output_folder = data_folder_path+r'/Data_Output'
 HoustonIrrAlbFolder = data_folder_path+r'/HoustonIrradianceAlbido_Tables'
 Houston_Area = HoustonIrrAlbFolder+r"/POWER_Regional_Monthly_2012_2022.csv"
 
+""" load data into GeoDataFrame """
+# Downtown_readcsv = gpd.read_file(Downtown) # Latitude:29.7588 :: Longitude:-95.3709
+# NE_Outer_readcsv = gpd.read_file(NE_Outer) # Latitude:30.055 :: Longitude:-95.0327
+# NW_Outer_readcsv = gpd.read_file(NW_Outer) # Latitude:30.0498 :: Longitude:-95.7514
+# SE_Outer_readcsv = gpd.read_file(SE_Outer) # Latitude:29.4749 :: Longitude:-95.028
+# SW_Outer_readcsv = gpd.read_file(SW_Outer) # Latitude:29.4757 :: Longitude:-95.7752
+HoustonArea_readcsv = gpd.read_file(Houston_Area) # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
+""" Preferred Soatial extent - Latitudes:29.5-30.1 :: Longitudes:-95 - -95.8 """
+
+""" preview data """
+# print(HoustonArea_readcsv.shape)
+# print(HoustonArea_readcsv.columns)
+# print(HoustonArea_readcsv.head())
+# print(HoustonArea_readcsv.dtypes)
+# print(HoustonArea_readcsv['-BEGIN'])
+# HoustonArea_readcsv.plot()
+
+lat_list = [29.5]
+lon_list = [-95.8]
+while lat_list[-1] <= 30.1:
+   lat_list.append(lat_list[-1]+.067)
+del lat_list[-1]
+
+while lon_list[-1] <= -95:
+   lon_list.append(lon_list[-1]+.067)
+del lon_list[-1]
+
+# Number each csv, then write a for loop to iterate thru a list of numbers that will call the csv file
+for x in lon_list:
+   for y in lat_list:
+      for z in range(1,109):
+         Houston_CSV_Reader = gpd.read_file(HoustonIrrAlbFolder+r'/Houston'+str(z)+'.csv') # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
+         # print(z)
+         iter_csv_file = Houston_CSV_Reader['-BEGIN']
+         # func(iter_csv_file) will run the data extract and dictionary creation
+
+
+
 def row_to_list(alias, row_list):
    """ Will take field name alias and the list containing values. 
    Output will be a list of the row and its values """
@@ -41,32 +79,13 @@ def column_to_dict(ID, dict_list):
       new_dict = {column_name:new_list} # new dictionary
       return new_dict
 
-""" load data into GeoDataFrame """
-# Downtown_readcsv = gpd.read_file(Downtown) # Latitude:29.7588 :: Longitude:-95.3709
-# NE_Outer_readcsv = gpd.read_file(NE_Outer) # Latitude:30.055 :: Longitude:-95.0327
-# NW_Outer_readcsv = gpd.read_file(NW_Outer) # Latitude:30.0498 :: Longitude:-95.7514
-# SE_Outer_readcsv = gpd.read_file(SE_Outer) # Latitude:29.4749 :: Longitude:-95.028
-# SW_Outer_readcsv = gpd.read_file(SW_Outer) # Latitude:29.4757 :: Longitude:-95.7752
-HoustonArea_readcsv = gpd.read_file(Houston_Area) # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
-""" Preferred Soatial extent - Latitudes:29.5-30.1 :: Longitudes:-95 - -95.8 """
-
-""" preview data """
-# print(HoustonArea_readcsv.shape)
-# print(HoustonArea_readcsv.columns)
-# print(HoustonArea_readcsv.head())
-# print(HoustonArea_readcsv.dtypes)
-# print(HoustonArea_readcsv['-BEGIN'])
-# HoustonArea_readcsv.plot()
-
 """ The following variables are Field Aliases for their respective field name """
 ALLSKY_SRF_ALB = 'All Sky Surface Albedo (dimensionless)'
 ALLSKY_SFC_LW_DWN = 'All Sky Surface Longwave Downward Irradiance (W/m^2)'
 ALLSKY_SFC_SW_DWN = 'All Sky Surface Shortwave Downward Irradiance (kW-hr/m^2/day)'
 ALLSKY_SFC_PAR_TOT = 'All Sky Surface PAR Total (W/m^2)'
-""" The following variables are the four different field dictionary lists """
+""" The following list temporarily store the values of the iterated row """
 row_values_list = []
-""" The following variables count the loop iterations over the data for a specific field. 
-Will be used as an ID to identify each dictionary's rows """
 """ The first column of the dataset(s) contains rows with the relevant data as a comma-separated list of months/titles/values """
 data_column = HoustonArea_readcsv['-BEGIN'] # '-BEGIN' is the column where the datavalues can be found
 """ This loop will iterate thru the index values of the Houston Area csv dataset 
@@ -142,4 +161,4 @@ else:
    """ Create a dataframe of the Listed Dictionary, then convert the dataframe to a new csv file """
    Houston_df = pd.DataFrame(Houston_dict_list)
    # Houston_df.to_csv(data_output_folder+'/Houston_Irradiance_Albido.csv')
-   print(Houston_df)
+   # print(Houston_df)
