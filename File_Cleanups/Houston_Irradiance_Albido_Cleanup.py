@@ -5,50 +5,26 @@ import geopandas as gpd
 
 """ Folder path for datasets """
 data_folder_path = r'/Users/javiermendez/Documents/Classes/Fall2024/GEOG 392/Project Data'
-data_output_folder = data_folder_path+r'/Data_Output'
+data_output_path = data_folder_path+r'/Data_Output'
 """ Houston Irradiance/Albido CSV files """
 HoustonIrrAlbFolder = data_folder_path+r'/HoustonIrradianceAlbido_Tables'
-Houston_Area = HoustonIrrAlbFolder+r"/POWER_Regional_Monthly_2012_2022.csv"
+# Houston_Area = HoustonIrrAlbFolder+r"/POWER_Regional_Monthly_2012_2022.csv"
+DownloadedData_Folder = HoustonIrrAlbFolder+r'/108HoustonIrradAlbedo_Tables'
+'/Users/javiermendez/Documents/Classes/Fall2024/GEOG 392/Project Data/HoustonIrradianceAlbido_Tables'
 
 """ load data into GeoDataFrame """
-# Downtown_readcsv = gpd.read_file(Downtown) # Latitude:29.7588 :: Longitude:-95.3709
-# NE_Outer_readcsv = gpd.read_file(NE_Outer) # Latitude:30.055 :: Longitude:-95.0327
-# NW_Outer_readcsv = gpd.read_file(NW_Outer) # Latitude:30.0498 :: Longitude:-95.7514
-# SE_Outer_readcsv = gpd.read_file(SE_Outer) # Latitude:29.4749 :: Longitude:-95.028
-# SW_Outer_readcsv = gpd.read_file(SW_Outer) # Latitude:29.4757 :: Longitude:-95.7752
-HoustonArea_readcsv = gpd.read_file(Houston_Area) # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
+# HoustonArea_readcsv = gpd.read_file(Houston_Area) # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
 """ Preferred Soatial extent - Latitudes:29.5-30.1 :: Longitudes:-95 - -95.8 """
 
 """ preview data """
-# print(HoustonArea_readcsv.shape)
-# print(HoustonArea_readcsv.columns)
-# print(HoustonArea_readcsv.head())
-# print(HoustonArea_readcsv.dtypes)
-# print(HoustonArea_readcsv['-BEGIN'])
-# HoustonArea_readcsv.plot()
+# print(Houston_CSV_Reader.shape)
+# print(Houston_CSV_Reader.columns)
+# print(Houston_CSV_Reader.head())
+# print(Houston_CSV_Reader.dtypes)
+# print(Houston_CSV_Reader['-BEGIN'])
+# Houston_CSV_Reader.plot()
 
-lat_list = [29.5]
-lon_list = [-95.8]
-while lat_list[-1] <= 30.1:
-   lat_list.append(lat_list[-1]+.067)
-del lat_list[-1]
-
-while lon_list[-1] <= -95:
-   lon_list.append(lon_list[-1]+.067)
-del lon_list[-1]
-
-# Number each csv, then write a for loop to iterate thru a list of numbers that will call the csv file
-for x in lon_list:
-   for y in lat_list:
-      for z in range(1,109):
-         Houston_CSV_Reader = gpd.read_file(HoustonIrrAlbFolder+r'/Houston'+str(z)+'.csv') # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
-         # print(z)
-         iter_csv_file = Houston_CSV_Reader['-BEGIN']
-         # func(iter_csv_file) will run the data extract and dictionary creation
-
-
-
-def row_to_list(alias, row_list):
+def row_to_list(row_list, alias, lat, lon):
    """ Will take field name alias and the list containing values. 
    Output will be a list of the row and its values """
    values_list = [] # this blank list will have the comma-separated values appended, this list will be the value of each row dictionary
@@ -56,13 +32,18 @@ def row_to_list(alias, row_list):
       if item == 0: # locates the field name index, then replaces field name with alias as first list value
          values_list.append(alias)
       else: # all other values
-         try:
-            if item >= 4: # this index is where the data values for each month is found
-               values_list.append(float(row_list[item])) # convert value to a numerical value
-            else:
-               values_list.append(row_list[item]) # indices before the monthly values
-         except ValueError: # accounts for index identifier columns
-            values_list.append(row_list[item])
+         if item == 1:
+            values_list.append(lat) # append lat value/identifier
+            values_list.append(lon) # append lon value/identifier
+            try: # try converting the current list item to a numeric value
+               values_list.append(float(row_list[item])) # append first month (JAN)
+            except ValueError: # unless the list item is an identifier value
+               values_list.append(row_list[item])
+         else: # all other values
+            try: # try converting the current list item to a numeric value
+               values_list.append(float(row_list[item]))
+            except ValueError: # unless the list item is an identifier value
+               values_list.append(row_list[item])
    else:
       return values_list
 
@@ -79,86 +60,108 @@ def column_to_dict(ID, dict_list):
       new_dict = {column_name:new_list} # new dictionary
       return new_dict
 
+
 """ The following variables are Field Aliases for their respective field name """
 ALLSKY_SRF_ALB = 'All Sky Surface Albedo (dimensionless)'
 ALLSKY_SFC_LW_DWN = 'All Sky Surface Longwave Downward Irradiance (W/m^2)'
 ALLSKY_SFC_SW_DWN = 'All Sky Surface Shortwave Downward Irradiance (kW-hr/m^2/day)'
 ALLSKY_SFC_PAR_TOT = 'All Sky Surface PAR Total (W/m^2)'
-""" The following list temporarily store the values of the iterated row """
-row_values_list = []
-""" The first column of the dataset(s) contains rows with the relevant data as a comma-separated list of months/titles/values """
-data_column = HoustonArea_readcsv['-BEGIN'] # '-BEGIN' is the column where the datavalues can be found
-""" This loop will iterate thru the index values of the Houston Area csv dataset 
-to query the correct rows for their name and lat/lon extent """
-for row_ind in range(len(data_column)): # finds index in range of data column rows
-   """ all rows after the 11th row contain the comma-separated values, but 
-   the first row identifies each index in the row (year,lat,lon,month,etc.) """
-   if (row_ind >= 11):
-      new_list = data_column[row_ind].split(',') # creates a list of the current row
-      """ Query thru the row values to find latitude and longitude, query for the values to 
-      be within the desired spatial extent, then add the query results to a dictionary """
-      try: # will test if the relevant indices are numerical and the right data (lat/lon)
-         lat = float(new_list[2]) # the third index provides the latitude
-         lon = float(new_list[3]) # the fourth index provides the longitude
-      except ValueError:
-         """ This exception will account for the first query row, which is the row index identifier """
-         dictionary_title = row_to_list('FIELD', new_list)
-         """ Append the row index identifier to each field dictionary before the values are added """
-         row_values_list.append(dictionary_title)
-         continue
-      if (lat >= 29.5) and (lat <= 30.1) and (lon >= -95.8) and (lon <= -95): # desired spatial extent query
-         """ Identifies the field name, and then creates a list of values, replacing 
-         the field name with the field alias, then appends new list to the dictionary """
-         if new_list[0] == 'ALLSKY_SRF_ALB':
-            row_dict = row_to_list(ALLSKY_SRF_ALB, new_list)
-            row_values_list.append(row_dict)
-         elif new_list[0] == 'ALLSKY_SFC_LW_DWN':
-            row_dict = row_to_list(ALLSKY_SFC_LW_DWN, new_list)
-            row_values_list.append(row_dict)
-         elif new_list[0] == 'ALLSKY_SFC_SW_DWN':
-            row_dict = row_to_list(ALLSKY_SFC_SW_DWN, new_list)
-            row_values_list.append(row_dict)
-         elif new_list[0] == 'ALLSKY_SFC_PAR_TOT':
-            row_dict = row_to_list(ALLSKY_SFC_PAR_TOT, new_list)
-            row_values_list.append(row_dict)
-else:
-   Houston_dict_list = {} # will contain the dictionary of every field in the dataset
-   """ Create the dictionary for each column, then append the dictionary to the large dictionary """
-   FIELD_list = column_to_dict(0, row_values_list)
-   Houston_dict_list.update(FIELD_list)
-   YEAR_list = column_to_dict(1, row_values_list)
-   Houston_dict_list.update(YEAR_list)
-   LAT_list = column_to_dict(2, row_values_list)
-   Houston_dict_list.update(LAT_list)
-   LON_list = column_to_dict(3, row_values_list)
-   Houston_dict_list.update(LON_list)
-   JAN_list = column_to_dict(4, row_values_list)
-   Houston_dict_list.update(JAN_list)
-   FEB_list = column_to_dict(5, row_values_list)
-   Houston_dict_list.update(FEB_list)
-   MAR_list = column_to_dict(6, row_values_list)
-   Houston_dict_list.update(MAR_list)
-   APR_list = column_to_dict(7, row_values_list)
-   Houston_dict_list.update(APR_list)
-   MAY_list = column_to_dict(8, row_values_list)
-   Houston_dict_list.update(MAY_list)
-   JUN_list = column_to_dict(9, row_values_list)
-   Houston_dict_list.update(JUN_list)
-   JUL_list = column_to_dict(10, row_values_list)
-   Houston_dict_list.update(JUL_list)
-   AUG_list = column_to_dict(11, row_values_list)
-   Houston_dict_list.update(AUG_list)
-   SEP_list = column_to_dict(12, row_values_list)
-   Houston_dict_list.update(SEP_list)
-   OCT_list = column_to_dict(13, row_values_list)
-   Houston_dict_list.update(OCT_list)
-   NOV_list = column_to_dict(14, row_values_list)
-   Houston_dict_list.update(NOV_list)
-   DEC_list = column_to_dict(15, row_values_list)
-   Houston_dict_list.update(DEC_list)
-   ANN_list = column_to_dict(16, row_values_list)
-   Houston_dict_list.update(ANN_list)
-   """ Create a dataframe of the Listed Dictionary, then convert the dataframe to a new csv file """
-   Houston_df = pd.DataFrame(Houston_dict_list)
-   # Houston_df.to_csv(data_output_folder+'/Houston_Irradiance_Albido.csv')
-   # print(Houston_df)
+""" The following list will store all the list of values of each iterated row """
+row_values_list = [] # aka, large list of data values
+
+lat_list = [29.5] # lowest latitude coordinate
+while lat_list[-1] <= 30.1: # this loop while add 9 values before 30.1, the 
+   lat_list.append(round((lat_list[-1]+0.07),2))
+del lat_list[-1]
+lat_iter = iter(lat_list)
+lat = next(lat_iter)
+
+lon_list = [-95] # lowest longitude coordinate
+while lon_list[-1] >= -95.8:
+   lon_list.append(round((lon_list[-1]-0.07),2))
+del lon_list[-1]
+lon_iter = iter(lon_list)
+lon = next(lon_iter)
+
+""" Number each csv, then write a for loop to iterate thru a list of numbers that will call the csv file """
+for z in range(1,109): # iterates thru numbered list of csv data files
+   # DownloadedData_Folder = r'/Users/javiermendez/Downloads/HoustonIrradAlbedo_Tables'
+   # Houston_CSV_Reader = gpd.read_file(DownloadedData_Folder+r'/Houston1.csv')
+   Houston_CSV_Reader = gpd.read_file(DownloadedData_Folder+r'/Houston'+str(z)+'.csv') # Spatial Coordinate extent - Latitudes:29-31 :: Longitudes:-94.5 - -96.5
+   iter_csv_file = Houston_CSV_Reader['-BEGIN'] # calls the columns with values for each csv data file
+   """ This loop should iterate thru the rows of values in each csv data file, add the values (alongside lat and lon) 
+   to a temporary list and once complete add the list of the values to the large list of data values """
+   for row_ind in range(len(iter_csv_file)): # iterates through the range of indices of the data column rows
+      if z == 1: # identifies the first file to extract the value identifier row as the header of the dataframe
+         """ The following code block and loop will extract the header list of values (value identifier row) 
+         from the csv as a list, then append the list to the large list of data values """
+         if row_ind == 11: # index of the value identifier row
+            iter_row = iter_csv_file[row_ind].split(',') # creates a list of the value identifier row
+            row_list = row_to_list(iter_row, 'FIELD', 'LAT', 'LON') # Inputs field, lat, and lon as headers for the fields, latitudes, and longitudes columns
+            row_values_list.append(row_list)
+      if row_ind > 11: # value rows after the identifier row
+         iter_row = iter_csv_file[row_ind].split(',') # creates a list of the current row
+         """ The following block of statements reads the field name for the row and inserts 
+         a field alias, and latitude and longitude coordinates """
+         if iter_row[0] == 'ALLSKY_SRF_ALB':
+            row_list = row_to_list(iter_row, ALLSKY_SRF_ALB, lat, lon)
+            row_values_list.append(row_list)
+         elif iter_row[0] == 'ALLSKY_SFC_LW_DWN':
+            row_list = row_to_list(iter_row, ALLSKY_SFC_LW_DWN, lat, lon)
+            row_values_list.append(row_list)
+         elif iter_row[0] == 'ALLSKY_SFC_SW_DWN':
+            row_list = row_to_list(iter_row, ALLSKY_SFC_SW_DWN, lat, lon)
+            row_values_list.append(row_list)
+         elif iter_row[0] == 'ALLSKY_SFC_PAR_TOT':
+            row_list = row_to_list(iter_row, ALLSKY_SFC_PAR_TOT, lat, lon)
+            row_values_list.append(row_list)
+   """ When z (file number) is 9, or every 9 files, the coordinates reset. 
+   The next file coordinates start with the first latitude (29.5) and 
+   continue to the next longtiude (-95 to -95.07) """
+   if z == 108: # Finds last index
+      break # breaks loop before error over iterator
+   if z % 9 == 0: # Determines if 9 iterations of file have been read
+      lon = next(lon_iter) # Next Longitude
+      lat_iter = iter(lat_list) # Resets the iterating list of latitudes
+      lat = next(lat_iter) # First latitude of reset
+   else: # Within the 9-file iterations
+      lat = next(lat_iter) # Next Latitude
+
+Houston_dict_list = {} # will contain the dictionary of every field in the dataset
+""" Create the dictionary for each dataframe column, then append the dictionary to the large dictionary """
+FIELD_dict = column_to_dict(0, row_values_list)
+Houston_dict_list.update(FIELD_dict)
+LAT_dict = column_to_dict(1, row_values_list)
+Houston_dict_list.update(LAT_dict)
+LON_dict = column_to_dict(2, row_values_list)
+Houston_dict_list.update(LON_dict)
+JAN_dict = column_to_dict(3, row_values_list)
+Houston_dict_list.update(JAN_dict)
+FEB_dict = column_to_dict(4, row_values_list)
+Houston_dict_list.update(FEB_dict)
+MAR_dict = column_to_dict(5, row_values_list)
+Houston_dict_list.update(MAR_dict)
+APR_dict = column_to_dict(6, row_values_list)
+Houston_dict_list.update(APR_dict)
+MAY_dict = column_to_dict(7, row_values_list)
+Houston_dict_list.update(MAY_dict)
+JUN_dict = column_to_dict(8, row_values_list)
+Houston_dict_list.update(JUN_dict)
+JUL_dict = column_to_dict(9, row_values_list)
+Houston_dict_list.update(JUL_dict)
+AUG_dict = column_to_dict(10, row_values_list)
+Houston_dict_list.update(AUG_dict)
+SEP_dict = column_to_dict(11, row_values_list)
+Houston_dict_list.update(SEP_dict)
+OCT_dict = column_to_dict(12, row_values_list)
+Houston_dict_list.update(OCT_dict)
+NOV_dict = column_to_dict(13, row_values_list)
+Houston_dict_list.update(NOV_dict)
+DEC_dict = column_to_dict(14, row_values_list)
+Houston_dict_list.update(DEC_dict)
+ANN_dict = column_to_dict(15, row_values_list)
+Houston_dict_list.update(ANN_dict)
+""" Create a dataframe of the Listed Dictionary, then convert the dataframe to a new csv file """
+Houston_df = pd.DataFrame(Houston_dict_list)
+print(Houston_df)
+# Houston_df.to_csv(data_output_path+'/108Table_HoustonIrradianceAlbedo.csv')
