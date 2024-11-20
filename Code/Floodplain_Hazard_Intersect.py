@@ -19,7 +19,7 @@ hazards_name = ["RiverineFlooding", "CoastalFlooding", "Hurricane"]
 
 """ Create GDB and setup workspace """
 # arcpy.management.CreateFileGDB(OUTPUT_DB_PATH, "Floodplain_Hazard_Overlap.gdb") # Create a new geodatabase for the Overlapping Dataset
-Floodplain_Hazard_gdb = OUTPUT_DB_PATH+"\Floodplain_Hazard_Overlap.gdb" # Path to new gdb
+Floodplain_Hazard_gdb = OUTPUT_DB_PATH+"\Floodplain_Hazard_Intersect.gdb" # Path to new gdb
 arcpy.env.workspace = Floodplain_Hazard_gdb # Set Work Environment to new path/gdb
 
 """ Ensure both shapefiles use the same Coordinate System """
@@ -27,15 +27,17 @@ floodplain_ref = arcpy.Describe(Floodplain_Data).spatialReference
 for hazard in range(len(hazards_list)):
     hazard_path = hazards_list[hazard] # path to iterated hazard list item
     new_hazard_file = hazards_name[hazard] # name of iterated hazard list
-    projected_hazard = fr"\{new_hazard_file}"
+    projected_hazard = hazard_path
     """ Determine coordinate system and possibly project layer to a more appropriate projection """
     if arcpy.Describe(hazard_path).spatialReference.factoryCode != floodplain_ref.factoryCode: # evaluates if hazard coordinate system is different to floodplain coordinate system
+        projected_hazard = NRI_GDB+fr"\{new_hazard_file}"
         arcpy.Project_management(hazard_path, new_hazard_file, floodplain_ref)
         # print(f"{new_hazard_file} has been projected")
-    else:
-        projected_hazard = hazard_path
-        # print(f"{new_hazard_file} DID NOT need projection")
+    # else:
+    #     print(f"{new_hazard_file} DID NOT need projection")
     in_features = [Floodplain_Data, projected_hazard]
+    arcpy.management.RepairGeometry(Floodplain_Data)
+    arcpy.management.RepairGeometry(projected_hazard)
     """ Overlapping function """
     # output_overlap = fr"Floodplain_{new_hazard_file}_Overlap"
     # arcpy.analysis.CountOverlappingFeatures(in_features, output_overlap,2)
