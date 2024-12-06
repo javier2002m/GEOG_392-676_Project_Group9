@@ -14,12 +14,19 @@ parksdata = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\Houston_Park_Green
 #Ensure both shapefiles use the same Coordinate System
 target_ref = arcpy.Describe(floodplain_data).spatialReference
 park_projection = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\Houston_Park_Greenspace\Park_Areas_Projected.shp"
-if arcpy.Describe(parksdata).spatialReference.factoryCode != target_ref.factoryCode:
-    arcpy.Project_management(parksdata, park_projection, target_ref)
+
+if not arcpy.Exists(park_projection):
+    # File does not exist, proceed with projection
+    arcpy.management.Project(parksdata, park_projection, target_ref)
+    print("Projection completed successfully!")
 else:
-    park_projection = parksdata
+    # File exists, handle this case
+    print(f"Output file '{park_projection}' already exists. No action taken.")
 
 #Perform Count Overlapping Features
 in_fcs = [floodplain_data, parksdata]
 output_overlap = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\Houston_Park_Greenspace\flooding-parks_overlap.shp"
-arcpy.analysis.CountOverlappingFeatures(in_fcs, output_overlap,2)
+if not arcpy.Exists(output_overlap):
+    arcpy.analysis.CountOverlappingFeatures(in_fcs, output_overlap, 2)
+else:
+    print(f"File already exists: {output_overlap}")

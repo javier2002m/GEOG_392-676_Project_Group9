@@ -14,12 +14,18 @@ impervious_data = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\Impervious_A
 target_ref = arcpy.Describe(floodplain_data).spatialReference
 impervious_projection = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\Impervious_Area\Impervious_Area_Projected.shp"
 
-if arcpy.Describe(impervious_data).spatialReference.factoryCode != target_ref.factoryCode:
-    arcpy.Project_management(impervious_data, impervious_projection, target_ref)
+if not arcpy.Exists(impervious_projection):
+    # File does not exist, proceed with projection
+    arcpy.management.Project(impervious_data, impervious_projection, target_ref)
+    print("Projection completed successfully!")
 else:
-    impervious_projection = impervious_data
+    # File exists, handle this case
+    print(f"Output file '{impervious_projection}' already exists. No action taken.")
 
 #Count ovelapping feautes
 in_fcs = [floodplain_data, impervious_data]
 output_overlap = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\Impervious_Area\flooding-impervious.shp"
-arcpy.analysis.CountOverlappingFeatures(in_fcs,output_overlap,2)
+if not arcpy.Exists(output_overlap):
+    arcpy.analysis.CountOverlappingFeatures(in_fcs, output_overlap, 2)
+else:
+    print(f"File already exists: {output_overlap}")

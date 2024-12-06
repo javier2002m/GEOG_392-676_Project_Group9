@@ -27,8 +27,15 @@ for shapefile in shapefiles:
 #Perform Count Overlapping Features
 in_fcs = [floodplain_data, inadequate_drainage_data]
 output_overlap1 = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\HoustonDrainageSystems\flooding-adequate_drainage_overlap.shp"
-arcpy.analysis.CountOverlappingFeatures(in_fcs, output_overlap1,2)
+if not arcpy.Exists(output_overlap1):
+    arcpy.analysis.CountOverlappingFeatures(in_fcs, output_overlap1, 2)
+else:
+    print(f"File already exists: {output_overlap1}")
+
 
 in_fcs2 = [floodplain_data, proposed_drainage_data]
 output_overlap2 = r"C:\Users\rober\GEOG_392-676_Project_Group9\Data\HoustonDrainageSystems\flooding-proposed_drainage_overlap.shp"
-arcpy.analysis.CountOverlappingFeatures(in_fcs2, output_overlap2,2)
+if not arcpy.Exists(output_overlap2):
+    arcpy.analysis.CountOverlappingFeatures(in_fcs2, output_overlap2, 2)
+else:
+    print(f"File already exists: {output_overlap2}")
